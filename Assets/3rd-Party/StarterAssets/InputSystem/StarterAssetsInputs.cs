@@ -12,6 +12,8 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+		public bool capture;
+		public bool aim;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -36,12 +38,23 @@ namespace StarterAssets
 
 		public void OnJump(InputValue value)
 		{
+			Debug.Log(value.isPressed);
 			JumpInput(value.isPressed);
 		}
 
 		public void OnSprint(InputValue value)
 		{
 			SprintInput(value.isPressed);
+		}
+
+		public void OnCapture(InputValue value)
+		{
+			capture = value.isPressed;
+		}
+
+		public void OnAim(InputValue value)
+		{
+			aim = value.isPressed;
 		}
 #endif
 
