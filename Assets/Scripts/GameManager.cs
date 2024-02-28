@@ -54,9 +54,9 @@ public class GameManager : MonoBehaviour
         var tex = await photoCapture.CapturePhoto();
         takenPhoto = tex;
         NormalViewUI.Instance.ShowPhoto(takenPhoto);
-        var res = textureComparer.CompareTextures(takenPhoto, desiredPhoto);
+        var res = textureComparer.CompareTextures(desiredPhoto, takenPhoto);
         Debug.Log($"similarity percentage: {res}");
-        if (res >= 70)
+        if (res >= 0.7f)
         {
             await TakeRandomShot();
         }
