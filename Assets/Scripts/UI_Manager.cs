@@ -45,6 +45,10 @@ public class UI_Manager : MonoBehaviour
     private int currentGalleryViewMode;
     //0:Default, 1:Hidden, 2:Expanded
 
+    [SerializeField] private GameObject hud;
+    [SerializeField] private Button startButton;
+    [SerializeField] private GameObject startGamePanel;
+    [SerializeField] private GameObject menuItems;
     #endregion
 
     private Vector2 initialPosition = new(927f, -172);
@@ -64,11 +68,22 @@ public class UI_Manager : MonoBehaviour
     private void OnEnable()
     {
         GameManager.OnChangeGameMode += OnChangeGameMode;
+        startButton.onClick.AddListener(StartGame);
     }
     
     private void OnDisable()
     {
         GameManager.OnChangeGameMode -= OnChangeGameMode;
+        startButton.onClick.RemoveListener(StartGame);
+    }
+
+    private void StartGame()
+    {
+        warningPanel.gameObject.SetActive(true);
+        hud.gameObject.SetActive(true);
+        startGamePanel.gameObject.SetActive(false);
+        menuItems.gameObject.SetActive(false);
+        GameManager.Instance.StartGame();
     }
 
     // Update is called once per frame
