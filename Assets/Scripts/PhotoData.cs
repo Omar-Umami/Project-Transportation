@@ -25,10 +25,6 @@ public class PhotoData
     
 }
 
-public interface IPhotoComparer
-{
-    public void ComparePhotos(PhotoData photo1, PhotoData photo2);
-}
 
 [Serializable]
 public class CameraTransform

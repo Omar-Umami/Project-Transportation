@@ -7,6 +7,10 @@ public class UiManager : MonoBehaviour
     [SerializeField] private NormalViewUI normalViewUI;
     [SerializeField] private CameraViewUI polaroidCameraViewUI;
 
+    public NormalViewUI NormalViewUI => normalViewUI;
+
+    public CameraViewUI PolaroidCameraViewUI => polaroidCameraViewUI;
+
     private void OnEnable()
     {
         GameManager.OnChangeGameMode += OnChangeGameMode;
@@ -21,14 +25,6 @@ public class UiManager : MonoBehaviour
     {
         SwitchMode(gameMode);
     }
-    
-    // private async void OnCapture()
-    // {
-    //     var photo = await photoCapture.CapturePhoto();
-    //     
-    //     normalViewUI.ShowPhoto(photo.SavedTexture);
-    // }
-    
 
     private void SwitchMode(eGameMode gameMode)
     {
@@ -46,5 +42,6 @@ public class UiManager : MonoBehaviour
                 throw new ArgumentOutOfRangeException(nameof(gameMode), gameMode, null);
         }
     }
+    
     
 }

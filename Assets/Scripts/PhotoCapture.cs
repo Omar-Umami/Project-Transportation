@@ -36,20 +36,20 @@ public class PhotoCapture : MonoBehaviour
     }
     
     [ContextMenu("TakeRandomPhoto")]
-    public async Task<Texture2D> CaptureRandomTexture()
+    public async Task<Texture2D> CaptureRandomTexture(CameraTransform cameraTransform)
     {
         const float captureRadius = 20f;
         var transform1 = cameraToCapture.transform;
         var position = transform1.position;
         var height = position.y;
         
-        var randomPosition = position + Random.insideUnitSphere * captureRadius;
+        var randomPosition = cameraTransform.Position;
         randomPosition.y = height; 
         
-        var randomRotation = Quaternion.Euler(Random.Range(-20f, 20f), Random.Range(0f, 10f), 0f);
+        var randomRotation = cameraTransform.Rotation;
         
         transform1.position = randomPosition;
-        // transform2.rotation = randomRotation;
+        transform1.rotation = randomRotation;
         var desiredPhoto = await CapturePhoto();
         
         

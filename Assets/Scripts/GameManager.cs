@@ -9,21 +9,32 @@ public class GameManager : MonoBehaviour
     public static event Action<eGameMode> OnChangeGameMode;
     
     [SerializeField] private PhotoCapture photoCapture;
-    [SerializeField] private TextureComparer textureComparer;
+    [SerializeField] private UiManager uiManager;
 
+    [SerializeField] private List<CameraTransform> cameraPositions;
     public static GameManager Instance;
     
     private Texture2D desiredPhoto;
     private Texture2D takenPhoto;
 
+    private int score;
+    private int numberOfTakenPictures;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+    
     private void OnEnable()
     {
         CameraController.Capture += OnCapture;
+        PlayerCollision.PlayerDie += OnPlayerDie;
     }
 
     private void OnDisable()
     {
         CameraController.Capture -= OnCapture;
+        PlayerCollision.PlayerDie -= OnPlayerDie;
     }
 
     private async void Update()
@@ -32,43 +43,91 @@ public class GameManager : MonoBehaviour
         {
             await TakeRandomShot();
         }
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            AddToCameraPositions();
+        }
     }
 
+
+    private void AddToCameraPositions()
+    {
+        var cameraTransform = new CameraTransform(Camera.main.transform);
+        cameraPositions.Add(cameraTransform);
+    }
+    
+    private void OnPlayerDie()
+    {
+        GameOver();
+    }
 
     private async void Start()
     {
         await TakeRandomShot();
     }
+    
+    public void ChangeGameMode(eGameMode gameMode)
+    {
+        OnChangeGameMode?.Invoke(gameMode);
+    }
 
     private async Task TakeRandomShot()
     {
-        ForceChangeGameMode(eGameMode.Polaroid);
-        var tex = await photoCapture.CaptureRandomTexture();
+        ChangeGameMode(eGameMode.Polaroid);
+        var tex = await photoCapture.CaptureRandomTexture(cameraPositions[0]);
         desiredPhoto = tex;
-        NormalViewUI.Instance.ShowDesiredPhoto(desiredPhoto);
-        ForceChangeGameMode(eGameMode.Normal);
+        uiManager.NormalViewUI.ShowDesiredPhoto(desiredPhoto);
+        ChangeGameMode(eGameMode.Normal);
     }
 
     private async void OnCapture()
     {
         var tex = await photoCapture.CapturePhoto();
         takenPhoto = tex;
-        NormalViewUI.Instance.ShowPhoto(takenPhoto);
-        var res = textureComparer.CompareTextures(desiredPhoto, takenPhoto);
+        uiManager.NormalViewUI.ShowPhoto(takenPhoto);
+        ChangeGameMode(eGameMode.Normal);
+        var res = TextureComparer.CompareTextures(desiredPhoto, takenPhoto);
         Debug.Log($"similarity percentage: {res}");
         if (res >= 0.7f)
         {
-            await TakeRandomShot();
+            numberOfTakenPictures++;
+            score += (int)res * 100;
+            if (!CheckForWin(numberOfTakenPictures))
+                await TakeRandomShot();
+            else
+                Win();
         }
     }
 
-    private void Awake()
+    public void ShowWarning(WarningData warningData, bool show)
     {
-        Instance = this;
+        if (warningData != null)
+            Debug.Log("Warning: Car approaching from direction " + warningData.Direction + "  Level: " +
+                      warningData.WarningLevel + " Show: " + show);
     }
 
-    public void ForceChangeGameMode(eGameMode gameMode)
+    public void ShowPhoto()
     {
-        OnChangeGameMode?.Invoke(gameMode);
+        uiManager.NormalViewUI.ShowPhoto(desiredPhoto);
     }
+
+    private bool CheckForWin(int value)
+    {
+        return value >= 5;
+    }
+
+    private void Win()
+    {
+        Debug.Log("Win");
+    }
+
+    private void GameOver()
+    {
+        Debug.Log("Lose");
+    }
+    
+    
+    
 }
+
