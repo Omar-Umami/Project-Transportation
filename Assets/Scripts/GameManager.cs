@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
 
     private int score;
     private int numberOfTakenPictures;
+
+    private int bonusMultiplier = 1;
     
 
     [SerializeField] private CameraPositionsSO cameraPositionsSo;
@@ -39,12 +41,19 @@ public class GameManager : MonoBehaviour
     {
         CameraController.Capture += OnCapture;
         PlayerCollision.PlayerDie += OnPlayerDie;
+        Timer.timerEnd += OnTimerEnd;
     }
 
     private void OnDisable()
     {
         CameraController.Capture -= OnCapture;
         PlayerCollision.PlayerDie -= OnPlayerDie;
+        Timer.timerEnd -= OnTimerEnd;
+    }
+    
+    private void OnTimerEnd()
+    {
+        bonusMultiplier = 1;
     }
 
     private async void Update()
@@ -113,9 +122,11 @@ public class GameManager : MonoBehaviour
         if (res >= 0.60f)
         {
             numberOfTakenPictures++;
-            score += (int)(res * 100);
-            
-                await uiManager.ComparingPhotosVisually(true, takenPhoto, res, score);
+            score += (int)(res * 100) * bonusMultiplier;
+
+            await uiManager.ComparingPhotosVisually(true, takenPhoto, res, score);
+            uiManager.StartBonusTime();
+            bonusMultiplier = 2;
             if (!CheckForWin(numberOfTakenPictures))
             {
                 await TakeRandomShot();
