@@ -110,9 +110,7 @@ public class GameManager : MonoBehaviour
 
     public void ShowWarning(WarningData warningData, bool show)
     {
-        if (warningData != null)
-            Debug.Log("Warning: Car approaching from direction " + warningData.Direction + "  Level: " +
-                      warningData.WarningLevel + " Show: " + show);
+        uiManager.UpdateWarning(warningData, show);
     }
     
 

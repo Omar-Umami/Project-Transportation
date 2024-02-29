@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,6 +31,13 @@ public class UI_Manager : MonoBehaviour
     [SerializeField] private Transform leftHUD;
     [SerializeField] private Image switcher;
     [SerializeField] private Image cameraHUD;
+
+    [SerializeField] private Transform warningPanel;
+    [SerializeField] private Image upWarningSign;
+    [SerializeField] private Image downWarningSign;
+    [SerializeField] private Image rightWarningSign;
+    [SerializeField] private Image leftWarningSign;
+    
     
     
     [SerializeField] private RectTransform photoGallery;
@@ -235,6 +243,70 @@ public class UI_Manager : MonoBehaviour
         seq.Append(photoGallery.DOLocalMove(new Vector3(730, 350, 0), 0.25f));
         seq.AppendCallback(() => currentGalleryViewMode = 0);
         AdjustGalleryButtons(0);
+    }
+
+    public void UpdateWarning(WarningData warningData, bool show)
+    {
+        if (!show)
+        {
+            warningPanel.gameObject.SetActive(false);
+            return;
+        }
+        warningPanel.gameObject.SetActive(true);
+        Color color;
+        switch (warningData.WarningLevel)
+        {
+            case eWarningLevel.Low:
+                color = Color.yellow;
+                break;
+            case eWarningLevel.Medium:
+                color = new Color(1f, 0.5f, 0f); ;
+                break;
+            case eWarningLevel.High:
+                color = Color.red;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        switch (warningData.Direction)
+        {
+            case eDirection.Up:
+                upWarningSign.gameObject.SetActive(true);
+                upWarningSign.color = color;
+                upWarningSign.transform.DOScale(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                downWarningSign.gameObject.SetActive(false);
+                leftWarningSign.gameObject.SetActive(false);
+                rightWarningSign.gameObject.SetActive(false);
+                break;
+            case eDirection.Down:
+                upWarningSign.gameObject.SetActive(false);
+                downWarningSign.gameObject.SetActive(true);
+                leftWarningSign.gameObject.SetActive(false);
+                rightWarningSign.gameObject.SetActive(false);
+                downWarningSign.color = color;
+                downWarningSign.transform.DOScale(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                break;
+            case eDirection.Left:
+                upWarningSign.gameObject.SetActive(false);
+                downWarningSign.gameObject.SetActive(false);
+                leftWarningSign.gameObject.SetActive(true);
+                rightWarningSign.gameObject.SetActive(false);
+                leftWarningSign.color = color;
+                leftWarningSign.transform.DOScale(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                break;
+            case eDirection.Right:
+                upWarningSign.gameObject.SetActive(false);
+                downWarningSign.gameObject.SetActive(false);
+                leftWarningSign.gameObject.SetActive(false);
+                rightWarningSign.gameObject.SetActive(true);
+                rightWarningSign.color = color;
+                rightWarningSign.transform.DOScale(0.5f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
     }
 
     #endregion
