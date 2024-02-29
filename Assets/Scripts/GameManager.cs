@@ -35,6 +35,10 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null)
+        {
+            Destroy(Instance);
+        }
         Instance = this;
     }
     
@@ -174,12 +178,14 @@ public class GameManager : MonoBehaviour
     private void Win()
     {
         gameState = eGameState.End;
+        Cursor.lockState = CursorLockMode.None;
         uiManager.ShowWinPanel();
     }
 
     private void GameOver()
     {
         gameState = eGameState.End;
+        Cursor.lockState = CursorLockMode.None;
         uiManager.ShowGameOver();
     }
 

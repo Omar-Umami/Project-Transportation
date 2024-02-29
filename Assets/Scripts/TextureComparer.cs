@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class TextureComparer 
 { 
@@ -20,6 +21,12 @@ public static class TextureComparer
         {
             scalingFactor = Mathf.Lerp(1f, 0.3f, intersection / 0.6f);
         }
+        else 
+        {
+            intersection += Random.Range(0.1f, 0.2f);
+        }
+
+        intersection = Mathf.Min(intersection, 100);
         
         var scaledIntersection = intersection * scalingFactor;
 

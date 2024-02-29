@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class VehicleSpawner : MonoBehaviour
 {
-    public Vehicle carPrefab;
+    public List<Vehicle> carPrefabs;
     public Transform[] spawnPoints;
     public float spawnInterval = 2f; // Adjust this value as needed
     private ObjectPool<Vehicle> vehiclePool;
@@ -53,7 +54,7 @@ public class VehicleSpawner : MonoBehaviour
     {
         var randomIndex = Random.Range(0, spawnPoints.Length);
         var spawnPoint = spawnPoints[randomIndex];
-        var newCar = Instantiate(carPrefab, spawnPoint.position, spawnPoint.rotation);
+        var newCar = Instantiate(carPrefabs[Random.Range(0, carPrefabs.Count)], spawnPoint.position, spawnPoint.rotation);
         return newCar;
     }
 
