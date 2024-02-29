@@ -27,6 +27,12 @@ public class UI_Manager : MonoBehaviour
     [SerializeField] private Transform leftHUD;
     [SerializeField] private Image switcher;
     [SerializeField] private Image cameraHUD;
+    
+    
+    [SerializeField] private RectTransform photoGallery;
+    [SerializeField] private GameObject hideButton, expandButton, showButton;
+    private int currentGalleryViewMode;
+    //0:Default, 1:Hidden, 2:Expanded
 
     #endregion
 
@@ -37,21 +43,52 @@ public class UI_Manager : MonoBehaviour
     private float fakeTimer;
     private Sprite fakeTaken;
     private Sprite fakeDesired;
-    
 
+    private int currentMode;
     #endregion
     // Start is called before the first frame update
     void Start()
     {
-        Invoke("ComparingPhotosVisually",1); 
+        
     }
 
     // Update is called once per frame
     void Update()
     {
         
-    }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            if (currentGalleryViewMode == 0)
+                HideGallery();
+            if (currentGalleryViewMode == 1)
+                ShowGallery();
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (currentGalleryViewMode == 0)
+                ExpandGallery();
+            if (currentGalleryViewMode == 2)
+                CollapseGallery();
+        }
+        
+        
+        //For testing purpose only
+        if(Input.GetKeyDown(KeyCode.Space))
+            SwitchMode();
+        if(Input.GetKeyDown(KeyCode.M))
+            ComparingPhotosVisually();
+        if (Input.GetKeyDown(KeyCode.P))
+            ShowBonus();
+        if (Input.GetKeyDown(KeyCode.O))
+            HideBonus();
+        
 
+
+
+            
+            
+    }
+    
 
     void ComparingPhotosVisually()
     {
@@ -70,11 +107,11 @@ public class UI_Manager : MonoBehaviour
         seq.Join(DOTween.To(() => valFloat, x => valFloat = x, 100f, 3f)
                 .SetEase(Ease.OutQuad))
             .OnUpdate(()=>accuracyText.text = ((int)valFloat)+"%")
-            .OnComplete(()=>CheckResult(true));
+            .OnComplete(()=>CaptureResult(true));
     //change check result with actual boolean
     }
 
-    void CheckResult(bool result)
+    void CaptureResult(bool result)
     {
         Sequence seq = DOTween.Sequence();
         float valFloat = 0f; 
@@ -113,6 +150,76 @@ public class UI_Manager : MonoBehaviour
 
     }
 
+    void SwitchMode()
+    {
+        Sequence seq = DOTween.Sequence();
+        if (currentMode == 0)
+        {
+            seq.Append(leftHUD.DOMoveX(-175, 0.3f));
+            seq.Join(switcher.DOFade(0.3f, 0.3f)).SetEase(Ease.InQuad);
+            seq.Join(cameraHUD.DOFade(1, 0.2f));
+            seq.Append(switcher.DOFade(0f, 0.3f));
+            currentMode = 1;
+        }
+        else if(currentMode == 1)
+        {
+            seq.Append(leftHUD.DOMoveX(238, 0.3f));
+            seq.Join(switcher.DOFade(0.3f, 0.3f)).SetEase(Ease.InQuad);
+            seq.Join(cameraHUD.DOFade(0, 0.2f));
+            seq.Append(switcher.DOFade(0f, 0.3f));
+            currentMode = 0;
+        }
+    }
+
+    void ShowBonus()
+    {
+        bonusLabel.transform.DOMoveX(80, 0.25f);
+    }
+
+    void HideBonus()
+    {
+        bonusLabel.transform.DOMoveX(-88, 0.25f);
+    }
+
+    #region Gallery Methods
+
+    public void ExpandGallery()
+    {
+        Sequence seq = DOTween.Sequence();
+        seq.Join(photoGallery.DOLocalMove(new Vector3(500, 75, 0), 0.25f));
+        seq.Join(photoGallery.DOScale(new Vector3(2.5f, 2.5f, 0),0.25f));
+        seq.AppendCallback(() => currentGalleryViewMode = 2);
+        AdjustGalleryButtons(2);
+    }
+    public void CollapseGallery()
+    {
+        Sequence seq = DOTween.Sequence();
+        seq.Join(photoGallery.DOLocalMove(new Vector3(730, 350, 0), 0.25f));
+        seq.Join(photoGallery.DOScale(new Vector3(1f, 1f, 0),0.25f));
+        seq.AppendCallback(() => currentGalleryViewMode = 0);
+        AdjustGalleryButtons(0);
+    }
+
+    public void HideGallery()
+    {
+        Sequence seq = DOTween.Sequence();
+        seq.Append(photoGallery.DOLocalMove(new Vector3(730, 640, 0), 0.25f));
+        seq.AppendCallback(() => currentGalleryViewMode = 1);
+        AdjustGalleryButtons(1);
+
+    }
+    public void ShowGallery()
+    {
+        Sequence seq = DOTween.Sequence();
+        seq.Append(photoGallery.DOLocalMove(new Vector3(730, 350, 0), 0.25f));
+        seq.AppendCallback(() => currentGalleryViewMode = 0);
+        AdjustGalleryButtons(0);
+    }
+
+    #endregion
+   
+    
+    
     #region Helpers
 
     void ChangePhoto(string photoText, Sprite photoSprite)
@@ -145,6 +252,45 @@ public class UI_Manager : MonoBehaviour
         }
 
         return result;
+    }
+
+    void AdjustGalleryButtons(int currentView)
+    {
+        switch (currentView)
+        {
+            case 0:
+                if(hideButton != null)
+                    hideButton.SetActive(true);
+                if(expandButton != null)
+                    expandButton.SetActive(true);
+                if(showButton != null)
+                    showButton.SetActive(false);
+                break;
+            case 1:
+                if(hideButton != null)
+                    hideButton.SetActive(false);
+                if(expandButton != null)
+                    expandButton.SetActive(false);
+                if(showButton != null)
+                    showButton.SetActive(true);
+                break;
+            case 2:
+                if(hideButton != null)
+                    hideButton.SetActive(false);
+                if(expandButton != null)
+                    expandButton.SetActive(true);
+                if(showButton != null)
+                    showButton.SetActive(false);
+                break;
+            default:
+                if(hideButton != null)
+                    hideButton.SetActive(false);
+                if(expandButton != null)
+                    expandButton.SetActive(true);
+                if(showButton != null)
+                    showButton.SetActive(true);
+                break;
+        }
     }
     
 
