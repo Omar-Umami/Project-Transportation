@@ -12,7 +12,7 @@ public class Vehicle : MonoBehaviour
         transform.Translate(Vector3.forward * (speed * Time.deltaTime));
     }
 
-    private void OnTriggerEnter(Collider collision)
+    private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("EndRoad"))
         { 
