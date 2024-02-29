@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UI_Manager : MonoBehaviour
@@ -11,6 +13,7 @@ public class UI_Manager : MonoBehaviour
     [SerializeField]
     private Image batteryFill;
 
+    [SerializeField] private Image takenPhotoFrame;
     [SerializeField] private Image takenPhoto;
     [SerializeField] private Image desiredPhoto;
     [SerializeField] private Image accuracyOutline;
@@ -36,6 +39,8 @@ public class UI_Manager : MonoBehaviour
 
     #endregion
 
+    private Vector2 initialPosition = new(927f, -172);
+
 
     #region TestingElements
 
@@ -46,10 +51,15 @@ public class UI_Manager : MonoBehaviour
 
     private int currentMode;
     #endregion
-    // Start is called before the first frame update
-    void Start()
+   
+    private void OnEnable()
     {
-        
+        GameManager.OnChangeGameMode += OnChangeGameMode;
+    }
+    
+    private void OnDisable()
+    {
+        GameManager.OnChangeGameMode -= OnChangeGameMode;
     }
 
     // Update is called once per frame
@@ -73,45 +83,43 @@ public class UI_Manager : MonoBehaviour
         
         
         //For testing purpose only
-        if(Input.GetKeyDown(KeyCode.Space))
-            SwitchMode();
-        if(Input.GetKeyDown(KeyCode.M))
-            ComparingPhotosVisually();
+        // if(Input.GetKeyDown(KeyCode.Space))
+        //     SwitchMode();
+        // if(Input.GetKeyDown(KeyCode.M))
+        //     ComparingPhotosVisually();
         if (Input.GetKeyDown(KeyCode.P))
             ShowBonus();
         if (Input.GetKeyDown(KeyCode.O))
             HideBonus();
-        
-
-
-
-            
-            
     }
     
 
-    void ComparingPhotosVisually()
+    public async Task ComparingPhotosVisually(bool success, Texture2D newTexture, float accuracy, float scoreValue)
     {
         Sequence seq = DOTween.Sequence();
+        var photoSprite = CreateSprite(newTexture);
+        takenPhoto.sprite = photoSprite;
+        takenPhotoFrame.rectTransform.anchoredPosition = initialPosition;
         float valFloat = 0f; 
-        seq.AppendCallback(()=> takenPhoto.gameObject.SetActive(true));
-        seq.Join(takenPhoto.transform.DOScale(Vector3.one, 0.3f).From(Vector3.zero));
+        seq.AppendCallback(()=> takenPhotoFrame.gameObject.SetActive(true));
+        seq.Join(takenPhotoFrame.transform.DOScale(Vector3.one, 0.3f).From(Vector3.zero));
         //revisit 54 & 55 when we have a world canvas photo
         //also add From because taken photo position is change after check result
         seq.AppendInterval(0.1f);
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(true));
         seq.Join(accuracyOutline.DOFillAmount(1, 0.4f).From(0));
         seq.AppendCallback(()=> accuracyFiller.gameObject.SetActive(true));
-        seq.Append(accuracyFiller.DOFillAmount(1, 3).From(0).SetEase(Ease.OutQuad));
+        seq.Append(accuracyFiller.DOFillAmount(accuracy, 3).From(0).SetEase(Ease.OutQuad));
         //switch endvalue with actual percentage value
-        seq.Join(DOTween.To(() => valFloat, x => valFloat = x, 100f, 3f)
+        seq.Join(DOTween.To(() => valFloat, x => valFloat = x, accuracy * 100, 3f)
                 .SetEase(Ease.OutQuad))
             .OnUpdate(()=>accuracyText.text = ((int)valFloat)+"%")
-            .OnComplete(()=>CaptureResult(true));
-    //change check result with actual boolean
+            .OnComplete(()=>CaptureResult(success, scoreValue));
+        await seq.AsyncWaitForCompletion();
+        //change check result with actual boolean
     }
 
-    void CaptureResult(bool result)
+    void CaptureResult(bool result, float scoreValue)
     {
         Sequence seq = DOTween.Sequence();
         float valFloat = 0f; 
@@ -121,39 +129,46 @@ public class UI_Manager : MonoBehaviour
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(false));
         if (result)
         {
-            seq.Append(takenPhoto.transform.DOMove(score.transform.position, 1));
-            seq.Join(takenPhoto.transform.DOScale(0, 1));
-            seq.AppendCallback(() => takenPhoto.gameObject.SetActive(false));
-            seq.Join(DOTween.To(() => valFloat, x => valFloat = x, 1500, 1.5f)
+            seq.Append(takenPhotoFrame.transform.DOMove(score.transform.position, 1));
+            seq.Join(takenPhotoFrame.transform.DOScale(0, 1));
+            seq.AppendCallback(() => takenPhotoFrame.gameObject.SetActive(false));
+            seq.Join(DOTween.To(() => valFloat, x => valFloat = x, scoreValue, 1.5f)
                     .SetEase(Ease.OutQuad))
-                .OnUpdate(() => score.text = ((int)valFloat) + " Pts")
-                .OnComplete(() => NextPhoto(1, desiredPhoto.sprite));
+                .OnUpdate(() => score.text = ((int)valFloat) + " Pts");
 
         }
         else
         {
-            seq.Join(takenPhoto.transform.DOScale(0, 0.7f));
-            seq.AppendCallback(() => takenPhoto.gameObject.SetActive(false));
+            seq.Join(takenPhotoFrame.transform.DOScale(0, 0.7f));
+            seq.AppendCallback(() => takenPhotoFrame.gameObject.SetActive(false));
         }
         
     }
-    void NextPhoto(int currentPhotoIndex,Sprite nextPhoto)
+    public void NextPhoto(int currentPhotoIndex,Texture2D texture)
     {
+        var photoSprite = CreateSprite(texture);
+        
         Sequence seq = DOTween.Sequence();
         string photoNumber = GetCountTextValue(currentPhotoIndex + 1);
 
         seq.Append(desiredPhotoText.DOFade(0, 0.5f));
         seq.Join(desiredPhoto.DOFade(0, 0.5f));
-        seq.AppendCallback(() => ChangePhoto(photoNumber, nextPhoto));
+        seq.AppendCallback(() => ChangePhoto(photoNumber, photoSprite));
         seq.Append(desiredPhotoText.DOFade(1, 0.5f));
         seq.Join(desiredPhoto.DOFade(1, 0.5f));
 
     }
 
-    void SwitchMode()
+    private static Sprite CreateSprite(Texture2D texture)
+    {
+        return Sprite.Create(texture,
+            new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    void SwitchMode(eGameMode gameMode)
     {
         Sequence seq = DOTween.Sequence();
-        if (currentMode == 0)
+        if (gameMode == eGameMode.Polaroid)
         {
             seq.Append(leftHUD.DOMoveX(-175, 0.3f));
             seq.Join(switcher.DOFade(0.3f, 0.3f)).SetEase(Ease.InQuad);
@@ -161,7 +176,7 @@ public class UI_Manager : MonoBehaviour
             seq.Append(switcher.DOFade(0f, 0.3f));
             currentMode = 1;
         }
-        else if(currentMode == 1)
+        else if(gameMode == eGameMode.Normal)
         {
             seq.Append(leftHUD.DOMoveX(238, 0.3f));
             seq.Join(switcher.DOFade(0.3f, 0.3f)).SetEase(Ease.InQuad);
@@ -180,6 +195,12 @@ public class UI_Manager : MonoBehaviour
     {
         bonusLabel.transform.DOMoveX(-88, 0.25f);
     }
+    
+    private void OnChangeGameMode(eGameMode gameMode)
+    {
+        SwitchMode(gameMode);
+    }
+    
 
     #region Gallery Methods
 

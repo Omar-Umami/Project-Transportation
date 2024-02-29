@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
     public static event Action<eGameMode> OnChangeGameMode;
     
     [SerializeField] private PhotoCapture photoCapture;
-    [SerializeField] private UiManager uiManager;
+    [SerializeField] private UI_Manager uiManager;
 
     [SerializeField] private List<CameraTransform> cameraPositions;
     public static GameManager Instance;
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
         ChangeGameMode(eGameMode.Polaroid);
         var tex = await photoCapture.CaptureRandomTexture(cameraPositions[0]);
         desiredPhoto = tex;
-        uiManager.NormalViewUI.ShowDesiredPhoto(desiredPhoto);
+        uiManager.NextPhoto(numberOfTakenPictures, desiredPhoto);
         ChangeGameMode(eGameMode.Normal);
     }
 
@@ -85,18 +85,26 @@ public class GameManager : MonoBehaviour
     {
         var tex = await photoCapture.CapturePhoto();
         takenPhoto = tex;
-        uiManager.NormalViewUI.ShowPhoto(takenPhoto);
+        // uiManager.NormalViewUI.ShowPhoto(takenPhoto);
         ChangeGameMode(eGameMode.Normal);
         var res = TextureComparer.CompareTextures(desiredPhoto, takenPhoto);
         Debug.Log($"similarity percentage: {res}");
         if (res >= 0.7f)
         {
             numberOfTakenPictures++;
-            score += (int)res * 100;
+            score += (int)(res * 100);
+            Debug.Log($"Score: {score}");
             if (!CheckForWin(numberOfTakenPictures))
+            {
+                await uiManager.ComparingPhotosVisually(true, takenPhoto, res, score);
                 await TakeRandomShot();
+            }
             else
                 Win();
+        }
+        else
+        {
+            await uiManager.ComparingPhotosVisually(false, takenPhoto, res, score);
         }
     }
 
@@ -106,11 +114,7 @@ public class GameManager : MonoBehaviour
             Debug.Log("Warning: Car approaching from direction " + warningData.Direction + "  Level: " +
                       warningData.WarningLevel + " Show: " + show);
     }
-
-    public void ShowPhoto()
-    {
-        uiManager.NormalViewUI.ShowPhoto(desiredPhoto);
-    }
+    
 
     private bool CheckForWin(int value)
     {
