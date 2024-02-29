@@ -2,15 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using StarterAssets;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private bool editorMode;
+    [SerializeField] private StarterAssetsInputs input;
     public static event Action<eGameMode> OnChangeGameMode;
     
     [SerializeField] private PhotoCapture photoCapture;
     [SerializeField] private UI_Manager uiManager;
+    [SerializeField] private CameraManager cameraManager;
 
     private List<CameraTransform> cameraPositions;
     public static GameManager Instance;
@@ -20,8 +24,11 @@ public class GameManager : MonoBehaviour
 
     private int score;
     private int numberOfTakenPictures;
+    
 
     [SerializeField] private CameraPositionsSO cameraPositionsSo;
+
+    public eGameState gameState;
 
     private void Awake()
     {
@@ -141,8 +148,21 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Lose");
     }
+
+    public void StartGame()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        input.capture = false;
+        gameState = eGameState.GamePlay;
+        cameraManager.SwitchToGamePlayCamera();
+    }
     
-    
-    
+}
+
+public enum eGameState
+{
+    Start,
+    GamePlay,
+    End
 }
 

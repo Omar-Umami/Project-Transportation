@@ -8,6 +8,7 @@ public class CarApproachIndicator : MonoBehaviour
     
     private void OnTriggerStay(Collider collision)
     {
+        if (GameManager.Instance.gameState != eGameState.GamePlay) return;
         if (collision.gameObject.layer != LayerMask.NameToLayer($"Vehicles")) return;
 
 

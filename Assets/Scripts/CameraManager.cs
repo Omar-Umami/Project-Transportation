@@ -9,6 +9,7 @@ public class CameraManager : MonoBehaviour
 {
     [SerializeField] private CinemachineVirtualCamera playerFollowCamera;
     [SerializeField] private CinemachineVirtualCamera polaroidCamera;
+    [SerializeField] private CinemachineVirtualCamera menuStartCamera;
 
     private void OnEnable()
     {
@@ -38,6 +39,11 @@ public class CameraManager : MonoBehaviour
                 polaroidCamera.Priority = 10;
                 break;
         }
+    }
+
+    public void SwitchToGamePlayCamera()
+    {
+        menuStartCamera.Priority = 0;
     }
     
 }

@@ -112,6 +112,7 @@ namespace StarterAssets
 
 		private void Update()
 		{
+			if (GameManager.Instance.gameState != eGameState.GamePlay) return;
 			JumpAndGravity();
 			GroundedCheck();
 			Move();

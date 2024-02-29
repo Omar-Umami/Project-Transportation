@@ -15,6 +15,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.Instance.gameState != eGameState.GamePlay) return;
         animator.SetBool(TakingPhoto, input.aim);
 
         if (!input.aim || !input.capture) return;
