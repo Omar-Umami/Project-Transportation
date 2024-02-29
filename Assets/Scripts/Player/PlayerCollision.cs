@@ -7,10 +7,11 @@ public class PlayerCollision : MonoBehaviour
 {
     public static event Action PlayerDie;
 
-    private void OnTriggerEnter(Collider collision)
+    private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.layer != LayerMask.NameToLayer($"Vehicles")) return; 
         
         PlayerDie?.Invoke();
     }
+    
 }

@@ -37,8 +37,8 @@ public class UI_Manager : MonoBehaviour
     [SerializeField] private Image downWarningSign;
     [SerializeField] private Image rightWarningSign;
     [SerializeField] private Image leftWarningSign;
-    
-    
+
+    [SerializeField] private Timer bonusTimer;
     
     [SerializeField] private RectTransform photoGallery;
     [SerializeField] private GameObject hideButton, expandButton, showButton;
@@ -69,12 +69,15 @@ public class UI_Manager : MonoBehaviour
     {
         GameManager.OnChangeGameMode += OnChangeGameMode;
         startButton.onClick.AddListener(StartGame);
+        Timer.timerEnd += TimerOnTimerEnd;
     }
     
+
     private void OnDisable()
     {
         GameManager.OnChangeGameMode -= OnChangeGameMode;
         startButton.onClick.RemoveListener(StartGame);
+        Timer.timerEnd -= TimerOnTimerEnd;
     }
 
     private void StartGame()
@@ -84,6 +87,17 @@ public class UI_Manager : MonoBehaviour
         startGamePanel.gameObject.SetActive(false);
         menuItems.gameObject.SetActive(false);
         GameManager.Instance.StartGame();
+    }
+
+    public void StartBonusTime()
+    {
+        ShowBonus();
+        bonusTimer.StartTimer(30);
+    }
+    
+    private void TimerOnTimerEnd()
+    {
+        HideBonus();
     }
 
     // Update is called once per frame
@@ -211,14 +225,14 @@ public class UI_Manager : MonoBehaviour
         }
     }
 
-    void ShowBonus()
+    private void ShowBonus()
     {
-        bonusLabel.transform.DOMoveX(80, 0.25f);
+        bonusLabel.rectTransform.DOAnchorPosX(0, 0.25f).SetEase(Ease.OutBack);
     }
 
-    void HideBonus()
+    private void HideBonus()
     {
-        bonusLabel.transform.DOMoveX(-88, 0.25f);
+        bonusLabel.rectTransform.DOAnchorPosX(-200, 0.25f).SetEase(Ease.OutBack);
     }
     
     private void OnChangeGameMode(eGameMode gameMode)
