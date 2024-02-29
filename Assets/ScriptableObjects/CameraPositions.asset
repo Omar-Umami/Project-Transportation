@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 140ff419eadb23948918f8158d24baf2, type: 3}
+  m_Name: CameraPositions
+  m_EditorClassIdentifier: 
+  cameraTransforms:
+  - position: {x: 17.348179, y: 1.4616339, z: 14.0894375}
+    rotation: {x: -0.035715114, y: -0.88123316, z: -0.06785067, w: 0.4664212}
+  - position: {x: 5.1195188, y: 1.4607466, z: 32.40059}
+    rotation: {x: 0.039233066, y: 0.74511087, z: 0.04325369, w: -0.6643793}
+  - position: {x: 6.5899334, y: 1.4637877, z: 43.296234}
+    rotation: {x: 0.06508855, y: 0.69008505, z: 0.062074132, w: -0.71811765}
+  - position: {x: 4.764888, y: 1.4533367, z: 52.0133}
+    rotation: {x: 0.08457564, y: 0.53297967, z: 0.05340182, w: -0.8401951}
+  - position: {x: -24.959436, y: 1.4664634, z: 99.75122}
+    rotation: {x: 0.25491127, y: 0.17046809, z: 0.042584762, w: -0.9508667}
+  - position: {x: 16.93129, y: 1.4556876, z: 22.370989}
+    rotation: {x: -0.013029652, y: 0.98640287, z: 0.09928448, w: 0.13031611}
+  forcedPositionsTransforms:
+  - position: {x: 27.24332, y: 1.4575653, z: -2.0776427}
+    rotation: {x: -0.033232957, y: 0.6623058, z: 0.029285567, w: 0.7479232}
+  - position: {x: 27.340416, y: 1.4757209, z: 24.636286}
+    rotation: {x: -0.13111784, y: 0.48438668, z: 0.073769525, w: 0.8618211}
+  - position: {x: 31.69386, y: 1.6654607, z: 77.53251}
+    rotation: {x: -0.035331674, y: 0.47989365, z: 0.019461583, w: 0.87639886}
