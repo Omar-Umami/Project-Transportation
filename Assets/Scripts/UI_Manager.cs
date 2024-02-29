@@ -133,6 +133,7 @@ public class UI_Manager : MonoBehaviour
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(true));
         seq.Join(accuracyOutline.DOFillAmount(1, 0.4f).From(0));
         seq.AppendCallback(()=> accuracyFiller.gameObject.SetActive(true));
+        seq.AppendCallback(() => AudioManager.Instance.Play("Recharge"));
         seq.Append(accuracyFiller.DOFillAmount(accuracy, 3).From(0).SetEase(Ease.OutQuad));
         //switch endvalue with actual percentage value
         seq.Join(DOTween.To(() => valFloat, x => valFloat = x, accuracy * 100, 3f)
@@ -147,6 +148,13 @@ public class UI_Manager : MonoBehaviour
     {
         Sequence seq = DOTween.Sequence();
         float valFloat = lastScore; 
+        if(scoreValue < 50)
+            AudioManager.Instance.Play(("Fail"));
+        else if(scoreValue >= 50 && scoreValue <= 75)
+            AudioManager.Instance.Play("Success1");
+        else
+            AudioManager.Instance.Play("Success2");
+        
         seq.Append(accuracyOutline.DOFillAmount(0, 0.15f));
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(false));
         seq.Join(accuracyFiller.DOFillAmount(0, 0.15f));

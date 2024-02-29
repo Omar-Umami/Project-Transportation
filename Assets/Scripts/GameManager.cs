@@ -105,6 +105,7 @@ public class GameManager : MonoBehaviour
 
     private async void OnCapture()
     {
+        AudioManager.Instance.Play("Capture");
         var tex = await photoCapture.CapturePhoto();
         takenPhoto = tex;
         ChangeGameMode(eGameMode.Normal);
