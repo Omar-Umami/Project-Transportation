@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     private List<CameraTransform> cameraPositions;
     public static GameManager Instance;
+    private readonly List<Texture2D> textures = new();
     
     private Texture2D desiredPhoto;
     private Texture2D takenPhoto;
@@ -92,7 +93,12 @@ public class GameManager : MonoBehaviour
     {
         if (!editorMode)
         {
-            cameraPositions = cameraPositionsSo.GetRandomPositions(5);
+            // cameraPositions = cameraPositionsSo.GetRandomPositions(5);
+            for (var index = 0; index < 10; index++)
+            {
+                textures.Add(await GetTexture());
+            }
+
             await TakeRandomShot();
         }
     }
@@ -102,14 +108,28 @@ public class GameManager : MonoBehaviour
         OnChangeGameMode?.Invoke(gameMode);
     }
 
-    private async Task TakeRandomShot()
+    private async Task TakeRandomShot(bool isLastOne = false)
     {
         ChangeGameMode(eGameMode.Polaroid);
-        var tex = await photoCapture.CaptureRandomTexture(cameraPositions[0]);
-        cameraPositions.RemoveAt(0);
+        Texture2D tex;
+        if (!isLastOne)
+        {
+            tex = textures[0];
+            textures.RemoveAt(0);
+        }
+        else
+        {
+            tex = await photoCapture.CaptureRandomTexture(cameraPositionsSo.ForcedPositionsTransforms[0]);
+        }
         desiredPhoto = tex;
-        uiManager.NextPhoto(numberOfTakenPictures, desiredPhoto);
+        uiManager.NextPhoto(numberOfTakenPictures, tex);
         ChangeGameMode(eGameMode.Normal);
+    }
+
+    private async Task<Texture2D> GetTexture()
+    {
+        var tex = await photoCapture.CaptureRandomTexture();
+        return tex;
     }
 
     private async void OnCapture()
@@ -129,7 +149,7 @@ public class GameManager : MonoBehaviour
             bonusMultiplier = 2;
             if (!CheckForWin(numberOfTakenPictures))
             {
-                await TakeRandomShot();
+                await TakeRandomShot(numberOfTakenPictures == 4);
             }
             else
                 Win();
@@ -153,12 +173,14 @@ public class GameManager : MonoBehaviour
 
     private void Win()
     {
-        Debug.Log("Win");
+        gameState = eGameState.End;
+        uiManager.ShowWinPanel();
     }
 
     private void GameOver()
     {
-        Debug.Log("Lose");
+        gameState = eGameState.End;
+        uiManager.ShowGameOver();
     }
 
     public void StartGame()

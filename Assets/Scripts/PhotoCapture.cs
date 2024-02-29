@@ -9,6 +9,7 @@ using Random = UnityEngine.Random;
 public class PhotoCapture : MonoBehaviour
 {
     private Camera cameraToCapture;
+    [SerializeField] private Transform centerPoint;
     
     private void Awake()
     {
@@ -36,17 +37,25 @@ public class PhotoCapture : MonoBehaviour
     }
     
     [ContextMenu("TakeRandomPhoto")]
-    public async Task<Texture2D> CaptureRandomTexture(CameraTransform cameraTransform)
+    public async Task<Texture2D> CaptureRandomTexture(CameraTransform cameraTransform = null)
     {
         const float captureRadius = 20f;
-        var transform1 = cameraToCapture.transform;
+        var transform1 = cameraToCapture.transform; 
         var position = transform1.position;
         var height = position.y;
-        
-        var randomPosition = cameraTransform.Position;
+        Vector3 randomPosition;
+        Quaternion randomRotation;
+        if (cameraTransform == null)
+        {
+            randomPosition = centerPoint.position + Random.insideUnitSphere * captureRadius;
+            randomRotation = Quaternion.Euler(0, Random.Range(-130, -50f), 0f);
+        }
+        else
+        {
+            randomPosition = cameraTransform.Position;
+            randomRotation = Quaternion.Euler(0, Random.Range(100, 140), 0f); 
+        }
         randomPosition.y = height; 
-        
-        var randomRotation = cameraTransform.Rotation;
         
         transform1.position = randomPosition;
         transform1.rotation = randomRotation;

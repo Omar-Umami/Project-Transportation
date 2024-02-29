@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -51,6 +52,10 @@ public class UI_Manager : MonoBehaviour
     [SerializeField] private GameObject menuItems;
     #endregion
 
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private TextMeshProUGUI gameOverScore;
+    [SerializeField] private TextMeshProUGUI endPanelText;
+    [SerializeField] private Button restartButton;
     private Vector2 initialPosition = new(927f, -172);
     private int lastScore;
 
@@ -70,6 +75,7 @@ public class UI_Manager : MonoBehaviour
         GameManager.OnChangeGameMode += OnChangeGameMode;
         startButton.onClick.AddListener(StartGame);
         Timer.timerEnd += TimerOnTimerEnd;
+        restartButton.onClick.AddListener(RestartScene);
     }
     
 
@@ -78,6 +84,12 @@ public class UI_Manager : MonoBehaviour
         GameManager.OnChangeGameMode -= OnChangeGameMode;
         startButton.onClick.RemoveListener(StartGame);
         Timer.timerEnd -= TimerOnTimerEnd;
+        restartButton.onClick.RemoveAllListeners();
+    }
+
+    private void RestartScene()
+    {
+        SceneManager.LoadScene(0);
     }
 
     private void StartGame()
@@ -93,6 +105,20 @@ public class UI_Manager : MonoBehaviour
     {
         ShowBonus();
         bonusTimer.StartTimer(30);
+    }
+
+    public void ShowGameOver()
+    {
+        endPanelText.text = $"GameOver";
+        gameOverPanel.gameObject.SetActive(true);
+        gameOverScore.text = $"{lastScore}";
+    }
+
+    public void ShowWinPanel()
+    {
+        endPanelText.text = $"Congratulations";
+        gameOverPanel.gameObject.SetActive(true);
+        gameOverScore.text = $"{lastScore}";
     }
     
     private void TimerOnTimerEnd()
