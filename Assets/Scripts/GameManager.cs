@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private bool editorMode;
     public static event Action<eGameMode> OnChangeGameMode;
     
     [SerializeField] private PhotoCapture photoCapture;
     [SerializeField] private UI_Manager uiManager;
 
-    [SerializeField] private List<CameraTransform> cameraPositions;
+    private List<CameraTransform> cameraPositions;
     public static GameManager Instance;
     
     private Texture2D desiredPhoto;
@@ -19,6 +20,8 @@ public class GameManager : MonoBehaviour
 
     private int score;
     private int numberOfTakenPictures;
+
+    [SerializeField] private CameraPositionsSO cameraPositionsSo;
 
     private void Awake()
     {
@@ -43,18 +46,25 @@ public class GameManager : MonoBehaviour
         {
             await TakeRandomShot();
         }
-
-        if (Input.GetKeyDown(KeyCode.H))
+        
+        if (Input.GetKeyDown(KeyCode.H) && editorMode)
         {
             AddToCameraPositions();
+        }
+        if (Input.GetKeyDown(KeyCode.F) && editorMode)
+        {
+            AddToCameraPositions(true);
         }
     }
 
 
-    private void AddToCameraPositions()
+    private void AddToCameraPositions(bool forced = false)
     {
         var cameraTransform = new CameraTransform(Camera.main.transform);
-        cameraPositions.Add(cameraTransform);
+        if (forced)
+            cameraPositionsSo.ForcedPositionsTransforms.Add(cameraTransform);
+        else 
+            cameraPositionsSo.CameraTransforms.Add(cameraTransform);
     }
     
     private void OnPlayerDie()
@@ -64,7 +74,11 @@ public class GameManager : MonoBehaviour
 
     private async void Start()
     {
-        await TakeRandomShot();
+        if (!editorMode)
+        {
+            cameraPositions = cameraPositionsSo.GetRandomPositions(5);
+            await TakeRandomShot();
+        }
     }
     
     public void ChangeGameMode(eGameMode gameMode)
@@ -76,6 +90,7 @@ public class GameManager : MonoBehaviour
     {
         ChangeGameMode(eGameMode.Polaroid);
         var tex = await photoCapture.CaptureRandomTexture(cameraPositions[0]);
+        cameraPositions.RemoveAt(0);
         desiredPhoto = tex;
         uiManager.NextPhoto(numberOfTakenPictures, desiredPhoto);
         ChangeGameMode(eGameMode.Normal);
@@ -85,18 +100,16 @@ public class GameManager : MonoBehaviour
     {
         var tex = await photoCapture.CapturePhoto();
         takenPhoto = tex;
-        // uiManager.NormalViewUI.ShowPhoto(takenPhoto);
         ChangeGameMode(eGameMode.Normal);
         var res = TextureComparer.CompareTextures(desiredPhoto, takenPhoto);
-        Debug.Log($"similarity percentage: {res}");
-        if (res >= 0.7f)
+        if (res >= 0.60f)
         {
             numberOfTakenPictures++;
             score += (int)(res * 100);
-            Debug.Log($"Score: {score}");
+            
+                await uiManager.ComparingPhotosVisually(true, takenPhoto, res, score);
             if (!CheckForWin(numberOfTakenPictures))
             {
-                await uiManager.ComparingPhotosVisually(true, takenPhoto, res, score);
                 await TakeRandomShot();
             }
             else

@@ -48,6 +48,7 @@ public class UI_Manager : MonoBehaviour
     #endregion
 
     private Vector2 initialPosition = new(927f, -172);
+    private int lastScore;
 
 
     #region TestingElements
@@ -130,7 +131,7 @@ public class UI_Manager : MonoBehaviour
     void CaptureResult(bool result, float scoreValue)
     {
         Sequence seq = DOTween.Sequence();
-        float valFloat = 0f; 
+        float valFloat = lastScore; 
         seq.Append(accuracyOutline.DOFillAmount(0, 0.15f));
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(false));
         seq.Join(accuracyFiller.DOFillAmount(0, 0.15f));
@@ -143,6 +144,7 @@ public class UI_Manager : MonoBehaviour
             seq.Join(DOTween.To(() => valFloat, x => valFloat = x, scoreValue, 1.5f)
                     .SetEase(Ease.OutQuad))
                 .OnUpdate(() => score.text = ((int)valFloat) + " Pts");
+            lastScore = (int)scoreValue;
 
         }
         else
