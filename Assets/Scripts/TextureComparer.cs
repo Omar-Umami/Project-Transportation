@@ -3,38 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TextureComparer : MonoBehaviour
-{
-    [SerializeField] private float tolerance = 0.01f;
-
-    public static TextureComparer Instance;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    // public float ComparePhotos(Texture2D photo1, Texture2D photo2)
-    // {
-    //     var pixels1 = photo1.GetPixels();
-    //     var pixels2 = photo2.GetPixels();
-    //
-    //     var totalPixels = pixels1.Length;
-    //     var matchingPixels = 0;
-    //
-    //     for (var i = 0; i < totalPixels; i++)
-    //     {
-    //         if (ColorCloseEnough(pixels1[i], pixels2[i], tolerance))
-    //         {
-    //             matchingPixels++;
-    //         }
-    //     }
-    //
-    //     var percentageSimilarity = (float)matchingPixels / totalPixels * 100f;
-    //     return percentageSimilarity;
-    // }
-    
-    public float CompareTextures(Texture2D texture1, Texture2D texture2)
+public static class TextureComparer 
+{ 
+    public static float CompareTextures(Texture2D texture1, Texture2D texture2)
     {
         var pixels1 = texture1.GetPixels();
         var pixels2 = texture2.GetPixels();
