@@ -96,7 +96,7 @@ public class UI_Manager : MonoBehaviour
         float valFloat = 0f; 
         seq.AppendCallback(()=> takenPhoto.gameObject.SetActive(true));
         seq.Join(takenPhoto.transform.DOScale(Vector3.one, 0.3f).From(Vector3.zero));
-        //revisit 54 & 55 when we have a world canvas photo
+        //revisit 97 & 98 when we have a world canvas photo
         //also add From because taken photo position is change after check result
         seq.AppendInterval(0.1f);
         seq.AppendCallback(()=> accuracyOutline.gameObject.SetActive(true));
@@ -104,10 +104,10 @@ public class UI_Manager : MonoBehaviour
         seq.AppendCallback(()=> accuracyFiller.gameObject.SetActive(true));
         seq.Append(accuracyFiller.DOFillAmount(1, 3).From(0).SetEase(Ease.OutQuad));
         //switch endvalue with actual percentage value
-        seq.Join(DOTween.To(() => valFloat, x => valFloat = x, 100f, 3f)
+        seq.Join(DOTween.To(() => valFloat, x => valFloat = x, 20f, 3f)
                 .SetEase(Ease.OutQuad))
             .OnUpdate(()=>accuracyText.text = ((int)valFloat)+"%")
-            .OnComplete(()=>CaptureResult(true));
+            .OnComplete(()=>CaptureResult(false));
     //change check result with actual boolean
     }
 
